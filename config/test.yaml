@@ -1,8 +1,7 @@
-time_steps: 100
+time_steps: 300
 threshold: 1
 func_type: 'exp'
 neuron_num: 20
-tau_mem: 10
-tau_psc: 10
+tau_mem: 5
+tau_psc: 3
 delta_mem: 0.2
-
