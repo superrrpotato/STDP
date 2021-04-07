@@ -63,8 +63,36 @@ class recurrent_network:
             self.spike_train[:,t] = (self.firing_rate[:,t] > prob)
             self.psc[:,t] = temp_psc * self.psc_decay + 1/self.tau_psc * self.spike_train[:,t]
             temp_psc = self.psc[:,t]
-
+    def STDP(self):
+        self.weight_update = np.ones(shape=(20,20),dtype=np.float32)
+        window_length = 5
+        window_t = np.arange(-window_length,window_length+1,1)
+        STDP_func = 0.42*np.exp(-window_t**2/(10))*(np.sign(window_t)+0.5)
+        STDP_repete = np.empty((self.neuron_num,2*window_length+1),dtype=np.float32)
+        STDP_repete[:]=STDP_func
+        pad_spikes = np.pad(self.spike_train,((0,0),(window_length,window_length)),'constant')
+        for i in range(self.time_steps):
+            updates = 1 + pad_spikes[:,i:i+11] * STDP_repete
+            start_index = np.where(pad_spikes[:,i+5]==1)
+            updates = np.prod(updates,axis=1)
+            end_index = np.where(updates!=1)
+            self.weight_update[np.ix_(start_index[0],end_index[0])]*=updates[end_index]
+        row, col = np.diag_indices_from(self.weight_update)
+        self.weight_update[row,col] = 1.
+        self.weight_matrix*=self.weight_update
+    def STDP_plot(self):
+        plt.figure(figsize=(7,3))
+        plt.subplot(1,2,1)
+        plt.imshow(self.weight_matrix)
+        plt.title('new weight matrix')
+        plt.colorbar()
+        plt.subplot(1,2,2)
+        plt.imshow(self.weight_update)
+        plt.title('weight updating signal')
+        plt.colorbar()
             
 a = recurrent_network(param)
 a.forward()
 a.plot()
+a.STDP()
+a.STDP_plot()
