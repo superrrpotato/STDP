@@ -1,0 +1,8 @@
+time_steps: 100
+threshold: 1
+func_type: 'exp'
+neuron_num: 20
+tau_mem: 10
+tau_psc: 10
+delta_mem: 0.2
+
