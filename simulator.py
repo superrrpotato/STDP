@@ -24,9 +24,10 @@ class recurrent_network:
         if init_params['func_type'] == 'exp':
             self.delta_mem = init_params['delta_mem']
             self.rho_0 = 1
-            print(self.rho_0)
-        self.weight_matrix = np.random.normal(size=(self.neuron_num, self.neuron_num)).astype(self.dtype)*0.4
-        self.input_weight = np.random.normal(size=(self.neuron_num)).astype(self.dtype)*0.4
+        self.weight_matrix = np.random.normal(size=(self.neuron_num, self.neuron_num)).astype(self.dtype)*0.3
+        row, col = np.diag_indices_from(self.weight_matrix)
+        self.weight_matrix[row,col] = -self.threshold
+        self.input_weight = np.random.normal(size=(self.neuron_num)).astype(self.dtype)*0.3
         self.membrane_potentials = np.zeros((self.neuron_num, self.time_steps), dtype=self.dtype)
         self.firing_rate = np.zeros((self.neuron_num, self.time_steps), dtype=self.dtype)
         self.spike_train = np.zeros((self.neuron_num, self.time_steps), dtype=np.int8)
@@ -37,37 +38,33 @@ class recurrent_network:
         self.tau_psc = init_params['tau_psc']
         self.psc_decay = 1 - 1/self.tau_psc
     def plot(self):
-        plt.figure()
+        fsize = 15
+        size_factor = 0.06
+        total_plots = 5
+        name_list = ['membrane_potentials','firing_rate','spike_train','input','psc']
+        value_list = [self.membrane_potentials,np.clip(self.firing_rate,0,3),self.spike_train,self.input,self.psc]
+        plt.figure(figsize=(30,3))
+#         plt.subplot(1,6,1)
         plt.imshow(self.weight_matrix)
-        plt.title('weight_matrix')
-        plt.figure(figsize=(30,1))
-        plt.imshow(self.membrane_potentials)
-        plt.title('membrane_potentials')
-        plt.figure(figsize=(30,1))
-        plt.imshow(np.clip(self.firing_rate,0,1))
-        plt.title('firing_rate')
-        plt.figure(figsize=(30,1))
-        plt.imshow(self.spike_train)
-        plt.title('spike_train')
-        plt.figure(figsize=(30,1))
-        plt.imshow(self.input)
-        plt.title('input')
-        plt.figure(figsize=(30,1))
-        plt.imshow(self.psc)
-        plt.title('psc')
+        plt.title('weight_matrix', fontsize = fsize)
+        for i in range(total_plots):
+            plt.figure(figsize=(self.time_steps*size_factor, self.neuron_num*size_factor))
+#             plt.subplot(1,6,i+2)
+            plt.imshow(value_list[i])
+            plt.title(name_list[i], fontsize = fsize)
+    def forward(self):
+        temp_mem = np.zeros(a.neuron_num)
+        temp_psc = np.zeros(a.neuron_num)
+        for t in range(self.time_steps):
+            temp_mem = temp_mem*self.mem_decay + np.matmul(self.input[:,t].T,self.input_weight) + np.matmul(temp_psc.T, self.weight_matrix)
+            self.membrane_potentials[:,t] = temp_mem.copy()
+            self.firing_rate[:,t] = self.rho_0 * np.exp((self.membrane_potentials[:,t]-self.threshold)/self.delta_mem)
+            prob = np.random.uniform(size=self.neuron_num)
+            self.spike_train[:,t] = (self.firing_rate[:,t] > prob)
+            self.psc[:,t] = temp_psc * self.psc_decay + 1/self.tau_psc * self.spike_train[:,t]
+            temp_psc = self.psc[:,t]
 
+            
 a = recurrent_network(param)
-temp_mem = np.zeros(a.neuron_num)
-temp_psc = np.zeros(a.neuron_num)
-for t in range(a.time_steps):
-    temp_mem = temp_mem*a.mem_decay + np.matmul(a.input[:,t].T,a.input_weight) + np.matmul(temp_psc.T, a.weight_matrix)
-    a.membrane_potentials[:,t] = temp_mem.copy()
-    a.firing_rate[:,t] = a.rho_0 * np.exp((a.membrane_potentials[:,t]-a.threshold)/a.delta_mem)
-    prob = np.random.uniform(size=20)
-    a.spike_train[:,t] = (a.firing_rate[:,t] > prob)
-    a.psc[:,t] = temp_psc * a.psc_decay + 1/a.tau_psc * a.spike_train[:,t]
-    temp_psc = a.psc[:,t]
-    temp_mem *= (1-a.spike_train[:,t])
+a.forward()
 a.plot()
-
-plt.show()
