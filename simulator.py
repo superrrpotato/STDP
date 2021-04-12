@@ -28,7 +28,7 @@ class recurrent_network:
         self.weight_matrix = np.random.normal(size=(self.neuron_num, self.neuron_num)).astype(self.dtype)*0.2
         row, col = np.diag_indices_from(self.weight_matrix)
         self.weight_matrix[row,col] = -self.threshold
-        self.input_weight = np.random.normal(size=(self.neuron_num)).astype(self.dtype)*0.1
+        self.input_weight = np.random.normal(size=(self.neuron_num)).astype(self.dtype)*0.2
         self.membrane_potentials = np.zeros((self.neuron_num, self.time_steps), dtype=self.dtype)
         self.firing_rate = np.zeros((self.neuron_num, self.time_steps), dtype=self.dtype)
         self.spike_train = np.zeros((self.neuron_num, self.time_steps), dtype=np.int8)
@@ -86,7 +86,10 @@ class recurrent_network:
         self.weight_update[row,col] = 1.
         self.weight_update = np.clip(self.weight_update, 0, 2)
         self.weight_matrix = self.weight_matrix * self.weight_update 
-        self.weight_matrix = 0.8 * self.weight_matrix / np.max(np.abs(self.weight_matrix[~np.eye(self.weight_matrix.shape[0],dtype=bool)]))
+        energy = np.linalg.norm(self.weight_matrix)
+        factor = 10/energy
+        self.weight_matrix *= factor
+#         self.weight_matrix = self.weight_matrix / np.max(np.abs(self.weight_matrix[~np.eye(self.weight_matrix.shape[0],dtype=bool)]))
         row, col = np.diag_indices_from(self.weight_matrix)
         self.weight_matrix[row,col] = -self.threshold
     def STDP_plot(self):
@@ -107,26 +110,44 @@ class recurrent_network:
 #         plt.pause(0.05)
     def auto_plot(self):
         plt.clf()
-        plt.subplot(4,3,1)
+        plt.subplot(2,4,1)
         plt.imshow(self.weight_matrix)
         plt.title('new weight matrix', fontsize = self.fsize)
         plt.colorbar()
-        plt.subplot(4,3,2)
+        plt.subplot(2,4,2)
         plt.imshow(self.weight_update)
         plt.title('weight updating signal', fontsize = self.fsize)
         plt.colorbar()
-        plt.subplot(4,3,3)
+        plt.subplot(2,4,3)
         plt.hist(self.weight_matrix[~np.eye(self.weight_matrix.shape[0],dtype=bool)].ravel(),bins=50)
         plt.title('weight distribution', fontsize = self.fsize)
+        plt.subplot(2,4,4)
+        self.graph_plot()
         size_factor = 0.12
         total_plots = 5
-        name_list = ['membrane_potentials','firing_rate','psc','spike_train','input']
-        value_list = [self.membrane_potentials,np.clip(self.firing_rate,0,1),self.psc,self.spike_train,self.input]
-        for i in [0,1,2]:
-            plt.subplot(4,1,2+i)
+        name_list = ['psc','spike_train','membrane_potentials','firing_rate','input']
+        value_list = [self.psc,self.spike_train,self.membrane_potentials,np.clip(self.firing_rate,0,1),self.input]
+        for i in [0]:
+            plt.subplot(2,1,2+i)
             plt.imshow(value_list[i])
             plt.title(name_list[i], fontsize = self.fsize)
         plt.pause(0.05)
+    def graph_plot(self):
+        G = nx.DiGraph()
+        G.add_nodes_from(range(self.neuron_num))
+        for i in range(self.neuron_num):
+            for j in range(self.neuron_num):
+                c = 'tab:green' if self.weight_matrix[i,j]>0 else 'tab:orange'
+                G.add_edge(i, j, color = c, weight = self.weight_matrix[i,j])
+        weights = [G[u][v]['weight'] for u,v in G.edges]
+        colors = [G[u][v]['color'] for u,v in G.edges]
+        options = {
+            'node_color': 'tab:blue',
+            'width': np.abs(weights),
+            'edge_color': colors,
+            'node_size': 30
+        }
+        nx.draw_circular(G, **options)
         
 plt.figure(figsize=(12,10))
 # %matplotlib inline
