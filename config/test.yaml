@@ -3,9 +3,9 @@ threshold: 1
 func_type: 'exp'
 neuron_num: 20
 tau_mem: 5
-tau_psc: 3
+tau_psc: 5
 delta_mem: 0.2
-learning_rate: 0.05
+learning_rate: 0.2
 window_size: 5
 # input_type: 'normal_random'
 input_type: 'const'
