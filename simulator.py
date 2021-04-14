@@ -72,7 +72,7 @@ class recurrent_network:
         learning_rate = self.lr
         window_length = self.window_size
         window_t = np.arange(-window_length,window_length+1,1)
-        STDP_func = 0.42*np.exp(-window_t**2/(10))*(np.sign(window_t)+0.5)
+        STDP_func = 0.42*np.exp(-window_t**2/(10))*(np.sign(window_t)+0)
         STDP_repete = np.empty((self.neuron_num,2*window_length+1),dtype=np.float32)
         STDP_repete[:]=STDP_func
         pad_spikes = np.pad(self.spike_train,((0,0),(window_length,window_length)),'constant')
@@ -84,6 +84,14 @@ class recurrent_network:
             self.weight_update[np.ix_(start_index[0],end_index[0])]*=updates[end_index]
         row, col = np.diag_indices_from(self.weight_update)
         self.weight_update[row,col] = 1.
+        
+
+#         print('ori update:', self.weight_update[0])
+#         print('weight sign:', np.sign(self.weight_matrix[0]))
+        self.weight_update = np.where(self.weight_matrix<0, 1/self.weight_update, self.weight_update)
+#         print('new update:', self.weight_update[0])
+#         print('\n')
+        
         self.weight_update = np.clip(self.weight_update, 0, 2)
         self.weight_matrix = self.weight_matrix * self.weight_update 
         energy = np.linalg.norm(self.weight_matrix)
@@ -98,7 +106,8 @@ class recurrent_network:
         window_t = np.arange(-window_length,window_length+1,1)
         STDP_func = 0.42*np.exp(-window_t**2/(10))*(np.sign(window_t)+0.5)
         relative_effect = np.array([np.convolve(a.spike_train[i], STDP_func) for i in range(a.neuron_num)])
-        updates = learning_rate * np.matmul(relative_effect[:,window_length:-window_length],self.spike_train.T)/self.neuron_num
+        updates = learning_rate * np.sign(self.weight_matrix) * np.matmul(relative_effect[:,window_length:-window_length],self.spike_train.T)/self.neuron_num
+        updates = np.where(self.weight_matrix<0, -updates, updates)
         self.weight_matrix += updates
         self.weight_update = updates
         row, col = np.diag_indices_from(self.weight_update)
