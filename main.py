@@ -1,7 +1,10 @@
+import torch
 from network_parser import parse
 import logging
 import argparse
 import global_v as glv
+from rsnn import RSNN
+import matplotlib.pyplot as plt
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-config', action='store', dest='config',\
@@ -37,6 +40,11 @@ if __name__ == '__main__':
         device = torch.device("cpu")
         print("No GPU is found")
     dtype = torch.float32
-
-	glv.init(device, dtype, params)
-
+    glv.init(device, dtype, params)
+    new_rsnn = RSNN(params)
+    input_spikes = torch.rand(20,300)
+    input_spikes = input_spikes>0.5
+    new_rsnn.forward(input_spikes)
+    plt.figure()
+    plt.imshow(new_rsnn.spike_train)
+    plt.show()

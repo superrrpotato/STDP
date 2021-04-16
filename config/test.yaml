@@ -1,12 +1,12 @@
 time_steps: 300
 threshold: 1
 func_type: 'exp'
-neuron_num: 20
+neuron_num: 30
 tau_mem: 5
 tau_psc: 5
 delta_mem: 0.2
-learning_rate: 0.02
+learning_rate: 0.1
 window_size: 5
 # input_type: 'normal_random'
 input_type: 'const'
-input_level: 0.01
+input_level: 0.05

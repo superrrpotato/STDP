@@ -1,4 +1,5 @@
 import torch
+import global_v as glv
 def psp(inputs, tau_psc):
     shape = inputs.shape
     # n_steps = network_config['n_steps']
