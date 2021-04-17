@@ -25,7 +25,7 @@ class RSNN():
                 self.neuron_num), dtype=glv.dtype, device=glv.device)*0.2
         row = col = range(self.neuron_num)
         self.total_weight_matrix[row,col] = -self.threshold
-        self.input_weight = torch.randn(self.observed_neuron_num,\
+        self.input_weight = 0.1 + torch.rand(self.observed_neuron_num,\
                 dtype=glv.dtype, device=glv.device) * 0.1
         self.latent_bias = torch.rand(self.latent_neuron_num,\
                 dtype=glv.dtype, device=glv.device) * 0.1

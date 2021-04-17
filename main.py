@@ -45,6 +45,6 @@ if __name__ == '__main__':
     input_spikes = torch.rand(20,300)
     input_spikes = input_spikes>0.5
     new_rsnn.forward(input_spikes)
-    plt.figure()
+    #plt.figure()
     plt.imshow(new_rsnn.spike_train)
-    plt.show()
+    #plt.show()
