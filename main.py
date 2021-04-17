@@ -4,6 +4,7 @@ import logging
 import argparse
 import global_v as glv
 from rsnn import RSNN
+import pycuda.driver as cuda
 import matplotlib.pyplot as plt
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
