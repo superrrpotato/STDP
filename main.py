@@ -44,9 +44,9 @@ if __name__ == '__main__':
     dtype = torch.float32
     glv.init(device, dtype, params)
     new_rsnn = RSNN(params)
-    input_spikes = torch.rand(20,300)
+    input_spikes = torch.rand(size=(20,300), device=glv.device)
     input_spikes = input_spikes>0.5
     new_rsnn.forward(input_spikes)
     #plt.figure()
-    plt.imshow(new_rsnn.spike_train)
+    plt.imshow(new_rsnn.spike_train.cpu())
     #plt.show()

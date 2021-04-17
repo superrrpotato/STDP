@@ -52,7 +52,7 @@ class RSNN():
             self.firing_rate[:, t] = self.rho_0 *\
                     torch.exp(torch.clamp((self.membrane_potentials[:,t]\
                     -self.threshold)/self.delta_mem, -100, 1))
-            prob = torch.rand(self.neuron_num)
+            prob = torch.rand(self.neuron_num, device=glv.device)
             self.spike_train[:, t] = (self.firing_rate[:,t] > prob)
             self.psc[:, t] = temp_psc * self.psc_decay + 1/self.tau_psc * self.spike_train[:,t]
             temp_psc = self.psc[:, t]
