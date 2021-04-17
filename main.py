@@ -1,4 +1,5 @@
 import torch
+import time
 from network_parser import parse
 import logging
 import argparse
@@ -44,9 +45,12 @@ if __name__ == '__main__':
     dtype = torch.float32
     glv.init(device, dtype, params)
     new_rsnn = RSNN(params)
-    input_spikes = torch.rand(size=(20,300), device=glv.device)
+    input_spikes = torch.rand(size=(2000,100), device=glv.device)
     input_spikes = input_spikes>0.5
-    new_rsnn.forward(input_spikes)
+    start_time = time.time()
+    for i in range(100):
+        new_rsnn.forward(input_spikes)
+    print("--- %s seconds ---" % (time.time() - start_time))
     #plt.figure()
-    plt.imshow(new_rsnn.spike_train.cpu())
+    # plt.imshow(new_rsnn.spike_train.cpu())
     #plt.show()

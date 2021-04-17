@@ -1,8 +1,8 @@
 device: 0
-time_steps: 300
+time_steps: 100
 threshold: 1
-observed_neuron_num: 20
-latent_neuron_num: 20
+observed_neuron_num: 2000
+latent_neuron_num: 2000
 tau_mem: 5
 tau_psc: 3
 func_type: 'exp'
