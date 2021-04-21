@@ -1,5 +1,5 @@
-import pycuda.driver as cuda
-import pycuda.autoinit
+#import pycuda.driver as cuda
+#import pycuda.autoinit
 class aboutCudaDevices():
     def __init__(self):
         pass

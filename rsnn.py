@@ -2,6 +2,7 @@ import global_v as glv
 import torch
 import torch.nn as nn
 import functions.util_functions as f
+import networkx as nx
 class RSNN():
     def __init__(self, init_params):
         # super(RSNN, self).__init__()
@@ -57,6 +58,24 @@ class RSNN():
             self.psc[:, t] = temp_psc * self.psc_decay + 1/self.tau_psc * self.spike_train[:,t]
             temp_psc = self.psc[:, t]
             temp_mem = temp_mem * (1 - self.spike_train[:, t].int())
+    def graph_plot(self):
+        G = nx.DiGraph()
+        G.add_nodes_from(range(self.observed_neuron_num))
+        for i in range(self.observed_neuron_num):
+            for j in range(self.observed_neuron_num):
+                c = 'gold' if self.weight_matrix[i,j]>0 else 'navy'
+                G.add_edge(i, j, color = c, weight = self.weight_matrix[i,j])
+        weights = [G[u][v]['weight'] for u,v in G.edges]
+        colors = [G[u][v]['color'] for u,v in G.edges]
+        pos = None
+        options = {
+            'node_color': 'mediumseagreen',
+            'width': np.abs(weights),
+            'edge_color': colors,
+            'node_size': 40,
+            'pos': pos
+        }
+        nx.draw(G, **options)
 
 
 
