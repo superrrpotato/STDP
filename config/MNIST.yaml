@@ -1,8 +1,8 @@
 device: 0
 time_steps: 10
 threshold: 1
-observed_neuron_num: 2000
-latent_neuron_num: 2000
+observed_neuron_num: 784
+latent_neuron_num: 784
 tau_mem: 5
 tau_psc: 3
 func_type: 'exp'
@@ -12,5 +12,3 @@ learning_rate: 0.02
 window_size: 5
 input_type: 'const'
 input_level: 0.01
-
-
