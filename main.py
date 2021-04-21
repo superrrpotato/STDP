@@ -1,3 +1,4 @@
+import os
 import torch
 import time
 from network_parser import parse
@@ -8,6 +9,8 @@ from rsnn import RSNN
 from utils import aboutCudaDevices
 import pycuda.driver as cuda
 import matplotlib.pyplot as plt
+from datasets import loadMNIST
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-config', action='store', dest='config',\
@@ -44,9 +47,22 @@ if __name__ == '__main__':
         print("No GPU is found")
     dtype = torch.float32
     glv.init(device, dtype, params)
+    batch_size = params['batch_size']
+    if params['dataset'] == "MNIST":
+        data_path = os.path.expanduser(params['data_path'])
+        train_loader, test_loader = loadMNIST.get_mnist(data_path,\
+                batch_size)
+    counter=0
+    for batch_idx, (inputs, labels) in enumerate(train_loader):
+        if counter == 1:
+            break
+        inputs = inputs.view(-1)
+        counter += 1
     new_rsnn = RSNN(params)
-    input_spikes = torch.rand(size=(2000,100), device=glv.device)
-    input_spikes = input_spikes>0.5
+    inputs = inputs.view(-1)
+    inputs = inputs.to(device)
+    inputs.type(dtype)
+    input_spikes = inputs.unsqueeze_(-1).repeat(1,params['time_steps'])
     start_time = time.time()
     for i in range(100):
         new_rsnn.forward(input_spikes)

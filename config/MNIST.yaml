@@ -12,3 +12,6 @@ learning_rate: 0.02
 window_size: 5
 input_type: 'const'
 input_level: 0.01
+dataset: "MNIST"
+data_path: '../datasets/mnist'
+batch_size: 1
