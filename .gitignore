@@ -3,4 +3,4 @@
 *.ipynb
 *.swp
 *.log
-__pycache__/*
+*/__pycache__/*
