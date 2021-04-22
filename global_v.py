@@ -1,9 +1,13 @@
 import torch
-
+import math
+import cell
 def init(dev, dty, params):
-    global dtype, device
+    global dtype, device, line_index, length, colum_index, non_zero_num
     dtype = dty
     device = dev
+    length = int(math.sqrt(params['observed_neuron_num']))
+    line_index, colum_index = cell.get_cellular_index(length)
+    non_zero_num = len(line_index)
     # time_steps = params['time_steps']
     # threshold = params['threshold']
     # observed_neuron_num = params['observed_neuron_num']

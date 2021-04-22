@@ -64,9 +64,10 @@ if __name__ == '__main__':
     inputs.type(dtype)
     input_spikes = inputs.unsqueeze_(-1).repeat(1,params['time_steps'])
     start_time = time.time()
-    for i in range(100):
+    for i in range(1):
         new_rsnn.forward(input_spikes)
     print("--- %s seconds ---" % (time.time() - start_time))
-    #plt.figure()
+    plt.figure()
+    new_rsnn.cellular_visualize()
     # plt.imshow(new_rsnn.spike_train.cpu())
     #plt.show()

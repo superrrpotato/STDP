@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import functions.util_functions as f
 import networkx as nx
+import matplotlib.pyplot as plt
 class RSNN():
     def __init__(self, init_params):
         # super(RSNN, self).__init__()
@@ -26,6 +27,8 @@ class RSNN():
                 self.neuron_num), dtype=glv.dtype, device=glv.device)*0.2
         row = col = range(self.neuron_num)
         self.total_weight_matrix[row,col] = -self.threshold
+        self.weight_matrix=self.total_weight_matrix[:self.observed_neuron_num]\
+                [:self.observed_neuron_num]
         self.input_weight = 0.1 + torch.rand(self.observed_neuron_num,\
                 dtype=glv.dtype, device=glv.device) * 0.1
         self.latent_bias = torch.rand(self.latent_neuron_num,\
@@ -58,6 +61,22 @@ class RSNN():
             self.psc[:, t] = temp_psc * self.psc_decay + 1/self.tau_psc * self.spike_train[:,t]
             temp_psc = self.psc[:, t]
             temp_mem = temp_mem * (1 - self.spike_train[:, t].int())
+    def stdp_update(self):
+        pass
+    def cellular_visualize(self):
+        self.connection_map = torch.zeros((glv.length, glv.length))
+        for i in range(glv.non_zero_num):
+            start_neuron_colu = glv.line_index[i] % glv.length
+            start_neuron_line = glv.line_index[i] // glv.length
+            target_neuron_colu = glv.colum_index[i] % glv.length
+            target_neuron_line = glv.colum_index[i] // glv.length
+            self.connection_map[start_neuron_colu, start_neuron_line]\
+                    += self.weight_matrix[glv.line_index[i], glv.colum_index[i]]
+            self.connection_map[target_neuron_colu, target_neuron_line]\
+                    += self.weight_matrix[glv.line_index[i], glv.colum_index[i]]
+        plt.imshow(self.connection_map)
+        plt.colorbar()
+        plt.show()
     """
     def graph_plot(self):
         G = nx.DiGraph()
