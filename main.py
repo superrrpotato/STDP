@@ -7,7 +7,7 @@ import argparse
 import global_v as glv
 from rsnn import RSNN
 from utils import aboutCudaDevices
-import pycuda.driver as cuda
+#import pycuda.driver as cuda
 import matplotlib.pyplot as plt
 from datasets import loadMNIST
 

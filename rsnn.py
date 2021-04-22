@@ -58,6 +58,7 @@ class RSNN():
             self.psc[:, t] = temp_psc * self.psc_decay + 1/self.tau_psc * self.spike_train[:,t]
             temp_psc = self.psc[:, t]
             temp_mem = temp_mem * (1 - self.spike_train[:, t].int())
+    """
     def graph_plot(self):
         G = nx.DiGraph()
         G.add_nodes_from(range(self.observed_neuron_num))
@@ -76,7 +77,7 @@ class RSNN():
             'pos': pos
         }
         nx.draw(G, **options)
-
+    """
 
 
 
