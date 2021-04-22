@@ -59,15 +59,22 @@ if __name__ == '__main__':
         inputs = inputs.view(-1)
         counter += 1
     new_rsnn = RSNN(params)
+
+    plt.figure()
+    plt.imshow(inputs.view(28,28))
     inputs = inputs.view(-1)
     inputs = inputs.to(device)
     inputs.type(dtype)
     input_spikes = inputs.unsqueeze_(-1).repeat(1,params['time_steps'])
     start_time = time.time()
-    for i in range(1):
-        new_rsnn.forward(input_spikes)
-    print("--- %s seconds ---" % (time.time() - start_time))
     plt.figure()
-    new_rsnn.cellular_visualize()
+    for i in range(100):
+        print(i)
+        new_rsnn.forward(input_spikes*5)
+        new_rsnn.stdp_update()
+        plt.clf()
+        new_rsnn.cellular_visualize()
+        plt.pause(0.05)
+    #print("--- %s seconds ---" % (time.time() - start_time))
     # plt.imshow(new_rsnn.spike_train.cpu())
     #plt.show()
