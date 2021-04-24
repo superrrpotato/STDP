@@ -37,7 +37,7 @@ def cellular_weight_visualize(inputs, params):
         new_rsnn.cellular_visualize(i)
         plt.pause(0.5)
 def spike_visualize(inputs, params):
-    plt.figure(figsize=(5,5))
+    plt.figure(figsize=(12,5))
     inputs = inputs.view(-1)
     inputs = inputs.to(glv.device)
     inputs.type(glv.dtype)
@@ -46,6 +46,6 @@ def spike_visualize(inputs, params):
     for i in range(10):
         print(i)
         new_rsnn.forward(input_spikes*5)
-        new_rsnn.stdp_update()
         new_rsnn.neuron_spike_visualize(i)
+        new_rsnn.stdp_update()
 

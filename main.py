@@ -59,8 +59,8 @@ if __name__ == '__main__':
         inputs = inputs.view(-1)
         counter += 1
     new_rsnn = RSNN(params)
-    cell.cellular_weight_visualize(inputs, params)
-    #cell.spike_visualize(inputs, params)
+    #cell.cellular_weight_visualize(inputs, params)
+    cell.spike_visualize(inputs, params)
     """
     plt.figure()
     plt.imshow(inputs.view(28,28))
