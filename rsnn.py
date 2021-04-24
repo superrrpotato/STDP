@@ -93,7 +93,7 @@ class RSNN():
         self.weight_matrix[row,col] = -self.threshold
         self.total_weight_matrix[:self.observed_neuron_num, \
                 :self.observed_neuron_num] = self.weight_matrix[row,col]
-    def cellular_visualize(self):
+    def cellular_visualize(self, j):
         self.connection_map = torch.zeros((glv.length, glv.length))
         for i in range(glv.non_zero_num):
             start_neuron_colu = glv.line_index[i] % glv.length
@@ -105,8 +105,13 @@ class RSNN():
             self.connection_map[target_neuron_colu, target_neuron_line]\
                     += self.weight_matrix[glv.line_index[i], glv.colum_index[i]]
         plt.imshow(self.connection_map)
-        plt.colorbar()
-        #plt.show()
+        plt.title(str(j))
+    def neuron_spike_visualize(self, i):
+        for t in range(self.time_steps):
+            plt.clf()
+            plt.imshow(self.membrane_potentials[:, t].view(glv.length, glv.length))
+            plt.title('iter:'+ str(i)+ 'time:'+ str(t))
+            plt.pause(0.5)
     """
     def graph_plot(self):
         G = nx.DiGraph()

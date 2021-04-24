@@ -10,7 +10,7 @@ from utils import aboutCudaDevices
 #import pycuda.driver as cuda
 import matplotlib.pyplot as plt
 from datasets import loadMNIST
-
+import cell
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-config', action='store', dest='config',\
@@ -59,7 +59,9 @@ if __name__ == '__main__':
         inputs = inputs.view(-1)
         counter += 1
     new_rsnn = RSNN(params)
-
+    cell.cellular_weight_visualize(inputs, params)
+    #cell.spike_visualize(inputs, params)
+    """
     plt.figure()
     plt.imshow(inputs.view(28,28))
     inputs = inputs.view(-1)
@@ -75,6 +77,7 @@ if __name__ == '__main__':
         plt.clf()
         new_rsnn.cellular_visualize()
         plt.pause(0.05)
+    """
     #print("--- %s seconds ---" % (time.time() - start_time))
     # plt.imshow(new_rsnn.spike_train.cpu())
     #plt.show()
