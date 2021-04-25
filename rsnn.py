@@ -18,28 +18,29 @@ class RSNN():
         self.mem_decay = 1 - 1/self.tau_mem
         self.tau_psc = init_params['tau_psc']
         self.psc_decay = 1 - 1/self.tau_psc
+        self.refractory = init_params['refractory']
         self.lr = init_params['learning_rate']
         self.window_size = init_params['window_size']
         if init_params['func_type'] == 'exp':
             self.delta_mem = init_params['delta_mem']
             self.rho_0 = init_params['rho_0']
-        self.rand_weight_matrix = torch.randn(size=(self.neuron_num,\
-                self.neuron_num), dtype=glv.dtype, device=glv.device)*0.1
+        self.rand_weight_matrix = 1 + torch.randn(size=(self.neuron_num,\
+                self.neuron_num), dtype=glv.dtype, device=glv.device)*0.5
         self.total_weight_matrix = torch.zeros(size=(self.neuron_num,\
                 self.neuron_num), dtype=glv.dtype, device=glv.device)
         self.total_weight_matrix[glv.line_index, glv.colum_index] = \
                 self.rand_weight_matrix[glv.line_index, glv.colum_index]
         row = col = range(self.neuron_num)
-        self.total_weight_matrix[row,col] = -self.threshold
+        self.total_weight_matrix[row,col] = -self.threshold * self.refractory
         self.weight_update = torch.ones((self.observed_neuron_num,\
             self.observed_neuron_num), dtype=glv.dtype, device=glv.device)
         self.weight_matrix=self.total_weight_matrix[:self.observed_neuron_num]\
                 [:self.observed_neuron_num]
         self.init_observed_energy = torch.norm(self.weight_matrix)
-        self.input_weight = 0.01 + torch.ones(self.observed_neuron_num,\
-                dtype=glv.dtype, device=glv.device) * 0
+        self.input_weight = 0.04 + torch.ones(self.observed_neuron_num,\
+                dtype=glv.dtype, device=glv.device) * 0.00
         self.latent_bias = torch.rand(self.latent_neuron_num,\
-                dtype=glv.dtype, device=glv.device) * 0.1
+                dtype=glv.dtype, device=glv.device) * 0.
         self.membrane_potentials = torch.zeros((self.neuron_num,\
                 self.time_steps), dtype=glv.dtype, device=glv.device)
         self.firing_rate = torch.zeros((self.neuron_num,\
@@ -57,17 +58,22 @@ class RSNN():
                     + torch.matmul(temp_psc.T, self.total_weight_matrix)
             # Not sure whethere we need input weights or not.
             temp_mem[:self.observed_neuron_num] += \
-                    torch.matmul(self.spikes[:, t].T, self.input_weight)
+                    (self.spikes[:, t] * self.input_weight)
             temp_mem[self.observed_neuron_num:] += self.latent_bias
             self.membrane_potentials[:, t] = temp_mem.clone()
+            # probability firing rate
+            """
             self.firing_rate[:, t] = self.rho_0 *\
                     torch.exp(torch.clamp((self.membrane_potentials[:,t]\
                     -self.threshold)/self.delta_mem, -100, 1))
             prob = torch.rand(self.neuron_num, device=glv.device)
             self.spike_train[:, t] = (self.firing_rate[:,t] > prob)
+            """
+            # LIF model
+            self.spike_train[:, t] = temp_mem > self.threshold
             self.psc[:, t] = temp_psc * self.psc_decay + 1/self.tau_psc * self.spike_train[:,t]
             temp_psc = self.psc[:, t]
-            temp_mem = temp_mem * (1 - self.spike_train[:, t].int())
+            #temp_mem = temp_mem * (1 - self.spike_train[:, t].int())
     def stdp_update(self):
         self.weight_update = torch.ones((self.observed_neuron_num,\
             self.observed_neuron_num), dtype=glv.dtype, device=glv.device)
@@ -92,33 +98,36 @@ class RSNN():
                 1/self.weight_update, self.weight_update) # inhibitory link
         self.weight_update = torch.clamp(self.weight_update, 0, 2)
         self.weight_matrix = self.weight_matrix * self.weight_update
+        self.weight_matrix = torch.clamp(self.weight_matrix, -10,10)
         #energy = torch.norm(self.weight_matrix)
         #factor = self.init_observed_energy/energy
         #self.weight_matrix *= factor # energy normalization
         row = col = range(self.observed_neuron_num)
-        self.weight_matrix[row,col] = -self.threshold
+        self.weight_matrix[row,col] = -self.threshold * self.refractory
         self.total_weight_matrix[:self.observed_neuron_num, \
                 :self.observed_neuron_num] = self.weight_matrix
-    def cellular_visualize(self, j):
+    def cellular_visualize(self):#, j):
         self.connection_map = torch.zeros((glv.length, glv.length))
         for i in range(glv.non_zero_num):
             start_neuron_colu = glv.line_index[i] % glv.length
             start_neuron_line = glv.line_index[i] // glv.length
             target_neuron_colu = glv.colum_index[i] % glv.length
             target_neuron_line = glv.colum_index[i] // glv.length
-            self.connection_map[start_neuron_colu, start_neuron_line]\
+            self.connection_map[start_neuron_line, start_neuron_colu]\
                     += self.weight_matrix[glv.line_index[i], glv.colum_index[i]]
-            self.connection_map[target_neuron_colu, target_neuron_line]\
+            self.connection_map[target_neuron_line, target_neuron_colu]\
                     += self.weight_matrix[glv.line_index[i], glv.colum_index[i]]
-        plt.imshow(self.connection_map)
-        plt.title(str(j))
+        #plt.imshow(self.connection_map)
+        #plt.colorbar()
+        #plt.title(str(j))
     def neuron_spike_visualize(self, i):
         for t in range(self.time_steps):
             plt.clf()
             plt.subplot(1,4,1)
-            plt.imshow(self.total_weight_matrix)
+            self.cellular_visualize()
+            plt.imshow(self.connection_map)
             plt.colorbar()
-            plt.title('previous weight update')
+            plt.title('weight connection, batch: '+str(i))
             plt.subplot(1,4,2)
             plt.imshow(self.spikes[:, t].view(glv.length, glv.length))
             plt.title('input')
@@ -131,7 +140,7 @@ class RSNN():
             plt.imshow(self.spike_train[:, t].float().view(glv.length, glv.length))
             plt.title('spike_train')
             plt.colorbar()
-            plt.pause(0.5)
+            plt.pause(0.05)
     """
     def graph_plot(self):
         G = nx.DiGraph()

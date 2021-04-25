@@ -24,12 +24,14 @@ def get_cellular_index(length):
             torch.tensor(colum_index).to(glv.device)
 def cellular_weight_visualize(inputs, params):
     plt.figure(figsize=(5,5))
+    plt.imshow(inputs.view(glv.length, glv.length))
+    plt.figure(figsize=(5,5))
     inputs = inputs.view(-1)
     inputs = inputs.to(glv.device)
     inputs.type(glv.dtype)
     input_spikes = inputs.unsqueeze_(-1).repeat(1,params['time_steps'])
     new_rsnn = RSNN(params)
-    for i in range(10):
+    for i in range(100):
         print(i)
         new_rsnn.forward(input_spikes*50)
         new_rsnn.stdp_update()
@@ -37,7 +39,7 @@ def cellular_weight_visualize(inputs, params):
         new_rsnn.cellular_visualize(i)
         plt.pause(0.5)
 def spike_visualize(inputs, params):
-    plt.figure(figsize=(12,5))
+    plt.figure(figsize=(15,2.5))
     inputs = inputs.view(-1)
     inputs = inputs.to(glv.device)
     inputs.type(glv.dtype)

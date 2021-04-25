@@ -52,15 +52,24 @@ if __name__ == '__main__':
         data_path = os.path.expanduser(params['data_path'])
         train_loader, test_loader = loadMNIST.get_mnist(data_path,\
                 batch_size)
-    counter=0
-    for batch_idx, (inputs, labels) in enumerate(train_loader):
-        if counter == 1:
-            break
-        inputs = inputs.view(-1)
-        counter += 1
     new_rsnn = RSNN(params)
+    #counter=0
+    plt.figure(figsize=(12,2.5))
+    for batch_idx, (inputs, labels) in enumerate(train_loader):
+        #if counter == 1:
+        #    break
+        inputs = inputs.view(-1)
+        inputs = inputs.to(glv.device)
+        inputs.type(glv.dtype)
+        input_spikes = inputs.unsqueeze_(-1).repeat(1,params['time_steps'])
+        new_rsnn.forward(input_spikes*50)
+        new_rsnn.stdp_update()
+        plt.clf()
+        new_rsnn.neuron_spike_visualize(batch_idx)
+        plt.pause(0.5)
+        #counter += 1
     #cell.cellular_weight_visualize(inputs, params)
-    cell.spike_visualize(inputs, params)
+    #cell.spike_visualize(inputs, params)
     """
     plt.figure()
     plt.imshow(inputs.view(28,28))
