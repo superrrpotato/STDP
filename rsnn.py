@@ -24,7 +24,7 @@ class RSNN():
         if init_params['func_type'] == 'exp':
             self.delta_mem = init_params['delta_mem']
             self.rho_0 = init_params['rho_0']
-        self.rand_weight_matrix = 1 + torch.randn(size=(self.neuron_num,\
+        self.rand_weight_matrix = 1.1 + torch.randn(size=(self.neuron_num,\
                 self.neuron_num), dtype=glv.dtype, device=glv.device)*0.5
         self.total_weight_matrix = torch.zeros(size=(self.neuron_num,\
                 self.neuron_num), dtype=glv.dtype, device=glv.device)
@@ -37,7 +37,7 @@ class RSNN():
         self.weight_matrix=self.total_weight_matrix[:self.observed_neuron_num]\
                 [:self.observed_neuron_num]
         self.init_observed_energy = torch.norm(self.weight_matrix)
-        self.input_weight = 0.04 + torch.ones(self.observed_neuron_num,\
+        self.input_weight = 1 + torch.ones(self.observed_neuron_num,\
                 dtype=glv.dtype, device=glv.device) * 0.00
         self.latent_bias = torch.rand(self.latent_neuron_num,\
                 dtype=glv.dtype, device=glv.device) * 0.
@@ -140,7 +140,7 @@ class RSNN():
             plt.imshow(self.spike_train[:, t].float().view(glv.length, glv.length))
             plt.title('spike_train')
             plt.colorbar()
-            plt.pause(0.05)
+            plt.pause(0.2)
     """
     def graph_plot(self):
         G = nx.DiGraph()

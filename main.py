@@ -62,7 +62,7 @@ if __name__ == '__main__':
         inputs = inputs.to(glv.device)
         inputs.type(glv.dtype)
         input_spikes = inputs.unsqueeze_(-1).repeat(1,params['time_steps'])
-        new_rsnn.forward(input_spikes*50)
+        new_rsnn.forward(input_spikes)
         new_rsnn.stdp_update()
         plt.clf()
         new_rsnn.neuron_spike_visualize(batch_idx)
